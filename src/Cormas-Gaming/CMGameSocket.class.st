@@ -23,8 +23,10 @@ CMGameSocket class >> instance [
 CMGameSocket >> start [
 	clients := OrderedCollection new.
 	server := ZnWebSocket startServerOn: 9090 do: [ :client |
+			Transcript cr; show: 'New client connected'; cr.
 			clients add: client.
 			client runWith: [ :message |
+					Transcript cr; show: 'Received: ', message; cr.
 					clients do: [ :c | c sendMessage: message ]
 			]
 	]
@@ -32,6 +34,8 @@ CMGameSocket >> start [
 
 { #category : 'accessing' }
 CMGameSocket >> stop [
-	clients := nil
-	server ifNotNil: [ server stop ]
+	clients ifNotNil: [ clients do: [ :c | c ifNotNil: [ c close ] ]].
+	clients := nil.
+	server ifNotNil: [ server stop ].
+	server := nil
 ]
