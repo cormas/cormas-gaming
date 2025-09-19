@@ -20,22 +20,65 @@ CMGameSocket class >> instance [
 ]
 
 { #category : 'accessing' }
-CMGameSocket >> start [
+CMGameSocket >> clients [
+
+	^ clients
+]
+
+{ #category : 'accessing' }
+CMGameSocket >> clients: anObject [
+
+	clients := anObject
+]
+
+{ #category : 'initialization' }
+CMGameSocket >> initialize [
 	clients := OrderedCollection new.
-	server := ZnWebSocket startServerOn: 9090 do: [ :client |
-			Transcript cr; show: 'New client connected'; cr.
+	server := ZnWebSocket new.
+	game := CMGame new.
+	super initialize.
+]
+
+{ #category : 'accessing' }
+CMGameSocket >> server [
+
+	^ server
+]
+
+{ #category : 'accessing' }
+CMGameSocket >> start: port [
+	game := CMGame new.
+	clients := OrderedCollection new.
+	server := ZnServer on: port.
+	server delegate: (ZnWebSocketDelegate map: '/ws' to: [ :client |
 			clients add: client.
-			client runWith: [ :message |
-					Transcript cr; show: 'Received: ', message; cr.
-					clients do: [ :c | c sendMessage: message ]
-			]
-	]
+			Transcript cr; show: 'New client connected'; cr.
+			[
+            client runWith: [ :message |
+                Transcript cr; show: 'Received: ', message; cr.
+                clients do: [ :c | c sendMessage: message ].
+            ].
+        ] on: ConnectionClosed do: [ :ex |
+            Transcript 
+                cr; show: 'Client disconnected '; cr.
+            clients remove: client ifAbsent: [].
+        ]
+	]).
+	server start.
+	
 ]
 
 { #category : 'accessing' }
 CMGameSocket >> stop [
-	clients ifNotNil: [ clients do: [ :c | c ifNotNil: [ c close ] ]].
-	clients := nil.
-	server ifNotNil: [ server stop ].
-	server := nil
+	game := nil.
+	clients ifNotNil: [
+        clients do: [ :client |
+            [ client close ] on: Error do: [ :ex | "Ignorer les erreurs de fermeture" ].
+        ].
+        clients := OrderedCollection new.
+    ].
+    server ifNotNil: [
+        server stop.
+        server := nil.
+    ].
 ]
