@@ -19,6 +19,11 @@ CMGame >> addEvent: anEvent [
 	pendingEvents add: anEvent
 ]
 
+{ #category : 'adding' }
+CMGame >> addPlayer: name data: anObject [
+	players at: name ifAbsentPut: anObject
+]
+
 { #category : 'initialization' }
 CMGame >> allPlayersSubmitted [
 
