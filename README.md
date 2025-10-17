@@ -22,15 +22,6 @@ Metacello new
 Manages HTTP logic and route dispatching via Zinc.
 
 #### 🔧 Key Methods
-- `start2`  
-  Starts the Zinc server and maps the following routes:
-  - `/home`, `/game`, `/game/harvester`, `/game/parkmanager`, `/click`, `/submit`, `/style.css`
-- `clientIPAddressFrom:`  
-  Extracts the user's IP address.
-- `homePageHtml`, `roleSelectionPageHtml`, `harvesterPageHtml`, `parkManagerPageHtml`  
-  HTML page templates returned for different routes.
-- `gameCss`  
-  Returns CSS code used by all frontend pages.
 
 ---
 
@@ -115,4 +106,4 @@ Encapsulates a player's action during a turn (e.g., selected cells).
 2. In a workspace, run:
 
 ```smalltalk
-CMGameHttpServer new start.
+CMGameServer instance start: 9090.
