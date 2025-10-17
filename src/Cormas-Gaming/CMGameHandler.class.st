@@ -2,8 +2,7 @@ Class {
 	#name : 'CMGameHandler',
 	#superclass : 'Object',
 	#instVars : [
-		'ws',
-		'files'
+		'ws'
 	],
 	#category : 'Cormas-Gaming',
 	#package : 'Cormas-Gaming'
@@ -11,17 +10,11 @@ Class {
 
 { #category : 'public' }
 CMGameHandler >> handleRequest: request [
-	| path |
-   path := request uri path.
-	(path beginsWith: 'ws') ifTrue: [
 		^ws handleRequest: request
-	].
-	^files handleRequest: request
 ]
 
 { #category : 'as yet unclassified' }
-CMGameHandler >> websocketDelegate: wsDelegate filesDelegate: filesDelegate [
+CMGameHandler >> websocketDelegate: wsDelegate [
 	ws := wsDelegate.
-   files := filesDelegate.
    ^self
 ]

@@ -31,21 +31,35 @@ CMGameServer >> clients: anObject [
 	clients := anObject
 ]
 
-{ #category : 'as yet unclassified' }
-CMGameServer >> filesHandler [
-	| workingDirectory filesDelegate |
-	workingDirectory := (FileSystem workingDirectory / 'cormas-gaming') asFileReference.
-	filesDelegate := ZnStaticFileServerDelegate new directory: workingDirectory.
-	^filesDelegate
-	
-]
-
 { #category : 'initialization' }
 CMGameServer >> initialize [
 	clients := OrderedCollection new.
 	server := ZnWebSocket new.
 	game := CMGame new.
 	super initialize.
+]
+
+{ #category : 'as yet unclassified' }
+CMGameServer >> joinGame: aClient data: aData [
+
+	| player cleanedPlayers json |
+	player := Dictionary new.
+	player at: 'role' put: (aData at: 'role').
+	player at: 'socket' put: aClient.
+	game addPlayer: (aData at: 'name') data: player.
+	
+	cleanedPlayers := Dictionary new.
+	game players keysAndValuesDo: [ :key :value |
+		cleanedPlayers at: key put: (value at: 'role')	
+	].
+
+	json := Dictionary new.
+	json at: 'type' put: 'game:join'.
+	json at: 'data' put: cleanedPlayers.
+	
+	clients do: [ :client |
+		client sendMessage: (NeoJSONWriter toString: json)
+	]
 ]
 
 { #category : 'as yet unclassified' }
@@ -65,7 +79,7 @@ CMGameServer >> start: port [
 	game := CMGame new.
 	clients := OrderedCollection new.
 	server := ZnServer on: port.
-	server delegate: (CMGameHandler new websocketDelegate: (self wsHandler) filesDelegate: (self filesHandler));
+	server delegate: (CMGameHandler new websocketDelegate: (self wsHandler));
 		logToTranscript;
 		start.
 	
@@ -90,32 +104,26 @@ CMGameServer >> stop [
 CMGameServer >> wsHandler [
 	| wsDelegate |
 	wsDelegate := (ZnWebSocketDelegate handler: [ :client |
-			clients do: [ :c |
-				| data |
-				data := Dictionary new.
-				data at: 'type' put: 'new'.
-				data at: 'data' put: 'New client connected'.
-				c sendMessage: (NeoJSONWriter toString: data)
-			].
 			clients add: client.
 			Transcript cr; show: 'New client connected'; cr.
 			[
-            client runWith: [ :data |
-                Transcript cr; show: 'Received: ', data asString; cr.
-                clients do: [ :c | c sendMessage: data ].
-            ].
+            client runWith: [ :data | self wsRouter: client data: data].
         ] on: ConnectionClosed do: [ :ex |
             Transcript 
                 cr; show: 'Client disconnected '; cr.
-            clients remove: client ifAbsent: [].
-				clients do: [ :c |
-					| data |
-					data := Dictionary new.
-					data at: 'type' put: 'close'.
-					data at: 'data' put: 'Client disconnected'.
-					c sendMessage: (NeoJSONWriter toString: data)
-				]
+				clients remove: client ifAbsent: [  ].
         ]
 	]).
 	^ wsDelegate
+]
+
+{ #category : 'as yet unclassified' }
+CMGameServer >> wsRouter: aClient data: aData [
+	| message type data |
+	message := NeoJSONReader fromString: aData.
+	type := message at: 'type'.
+	data := message at: 'data'.
+	Transcript show: data.
+	type = 'game:join' ifTrue: [ self joinGame: aClient data: data ].
+	type = 'game:state' ifTrue: [  ]
 ]
