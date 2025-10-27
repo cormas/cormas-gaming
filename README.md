@@ -2,10 +2,17 @@
 Cormas extension adding support for serious games by implementation of serious game: Planet C, play again?
 
 ```st
+"Load Cormas"
 Metacello new
-  baseline: 'CormasGaming';
-  repository: 'github://cormas/cormas-gaming:main';
-  load
+    repository: 'github://cormas/cormas';
+    baseline: 'Cormas';
+    load.
+
+"Load the Gaming plugin"
+Metacello new
+    baseline: 'CormasGaming';
+    repository: 'github://cormas/cormas-gaming:main';
+    load
 ```
 
 # 🌍 Planet C, play again? – Web-Based Simulation Game
