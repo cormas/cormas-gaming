@@ -13,6 +13,9 @@ Metacello new
     baseline: 'CormasGaming';
     repository: 'github://cormas/cormas-gaming:main';
     onConflict: [ :e | e useIncoming ];
+    onUpgrade: [ :e | e useIncoming ];
+    onWarning: [ :e | e load ];
+    ignoreImage;
     load
 ```
 
