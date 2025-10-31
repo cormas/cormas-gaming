@@ -11,6 +11,12 @@ BaselineOfCormasGaming >> baseline: spec [
 	<baseline>
 
 	spec for: #common do: [
+		
+		spec
+			baseline: 'ZincHTTPComponents'
+			with: [ spec
+				loads: #('Zinc-WebSocket-Core');
+				repository: 'github://svenvc/zinc/repository' ].
 
 		spec
 			package: 'Cormas-Gaming';
