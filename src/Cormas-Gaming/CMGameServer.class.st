@@ -58,7 +58,7 @@ CMGameServer >> joinGame: aClient data: aData [
 	json at: 'data' put: cleanedPlayers.
 	
 	clients do: [ :client |
-		client sendMessage: (NeoJSONWriter toString: json)
+		client sendMessage: (STONJSON toString: json)
 	]
 ]
 
@@ -120,7 +120,7 @@ CMGameServer >> wsHandler [
 { #category : 'as yet unclassified' }
 CMGameServer >> wsRouter: aClient data: aData [
 	| message type data |
-	message := NeoJSONReader fromString: aData.
+	message := STONJSON fromString: aData.
 	type := message at: 'type'.
 	data := message at: 'data'.
 	Transcript show: data.
